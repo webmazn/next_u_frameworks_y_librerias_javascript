@@ -1,13 +1,20 @@
 var juegoAPP = (function(){
-    var tiempo = 1000;
-    var color1 = "FF00FF";
+    var tiempo = 1500;
+    var color1 = "#DCFF0E";
     var color2 = "#FFFFFF";
 
     var cambiarColorTitulo = function(){
         var titulo = $(".main-titulo");
+        var contador = 0;
         var intervalo = setInterval(function(){
-            titulo.animate({"color":color2});
-            clearInterval(intervalo);
+            if(contador%2==0){
+                titulo.animate({"color":color2});
+            }else{
+                titulo.animate({"color":color1});
+            }
+            contador++;
+            console.log(contador);
+            //clearInterval(intervalo);
         }, tiempo);
     }
     return {
