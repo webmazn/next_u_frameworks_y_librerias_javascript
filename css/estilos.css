@@ -36,6 +36,11 @@ body{
   flex-flow: row wrap;
 }
 
+.panel-tablero img{
+  height: 97px;
+  width: 100%;
+}
+
 .panel-score{
   width: 25%;
   height: 700px;
