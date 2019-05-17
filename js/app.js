@@ -52,29 +52,44 @@ var juegoAPP = (function(){
         callback();
     }
     var caramelosLineaHorizontal = function(){        
-        var clasesTotales = new Array();
+        var clasesHorizontal = new Array();
+        var clasesVertical = new Array();
         for(var i=0; i<cantidad; i++){
-            var clases = new Array();
+            var clasesH = new Array();
+            var clasesV = new Array();
             for(var j=0; j<cantidad; j++){
-                var clase = $(".col-"+(j+1)).find("img").eq(i).attr("class");
-                clases.push(clase);                  
+                var claseH = $(".col-"+(j+1)).find("img").eq(i).attr("class");
+                clasesH.push(claseH);
+                var claseV = $(".col-"+(i+1)).find("img").eq(j).attr("class");
+                clasesV.push(claseV);
             }
-            clasesTotales.push(clases);
+            clasesHorizontal.push(clasesH);
+            clasesVertical.push(clasesV);
         }
-        console.log(clasesTotales);
+        console.log(clasesHorizontal);
+        console.log(clasesVertical);
         var posicionesHorizontales = new Array();
+        var posicionesVerticales = new Array();
         for(var i=0; i<cantidad; i++){
             var posicionHorizontal = new Array();
+            var posicionVertical = new Array();
             for(var j=0; j<cantidad; j++){
-                if(clasesTotales[i][j]==clasesTotales[i][j-1] && clasesTotales[i][j]==clasesTotales[i][j+1]){
+                if(clasesHorizontal[i][j]==clasesHorizontal[i][j-1] && clasesHorizontal[i][j]==clasesHorizontal[i][j+1]){
                     if(!posicionHorizontal.includes(j-1))   posicionHorizontal.push(j-1);
                     if(!posicionHorizontal.includes(j))     posicionHorizontal.push(j);
                     if(!posicionHorizontal.includes(j+1))   posicionHorizontal.push(j+1);
                 }
+                if(clasesVertical[i][j]==clasesVertical[i][j-1] && clasesVertical[i][j]==clasesVertical[i][j+1]){
+                    if(!posicionVertical.includes(j-1))   posicionVertical.push(j-1);
+                    if(!posicionVertical.includes(j))     posicionVertical.push(j);
+                    if(!posicionVertical.includes(j+1))   posicionVertical.push(j+1);
+                }
             }
             posicionesHorizontales.push(posicionHorizontal);
+            posicionesVerticales.push(posicionVertical);
         }
         console.log(posicionesHorizontales);
+        console.log(posicionesVerticales);
         for(var i=0; i<cantidad; i++){
             if(posicionesHorizontales[i].length>0){
                 for(var j=0; j<posicionesHorizontales[i].length; j++){
@@ -83,7 +98,16 @@ var juegoAPP = (function(){
                         $(this).remove();
                     });
                     puntajeTotal += puntaje;  
-                }
+                }             
+            }
+            if(posicionesVerticales[i].length>0){
+                for(var j=0; j<posicionesVerticales[i].length; j++){
+                    var posicion = posicionesVerticales[i][j];
+                    $(".col-"+(i+1)).find("img").eq(posicion).fadeOut(500, function(){
+                        $(this).remove();
+                    });
+                    puntajeTotal += puntaje;  
+                }                   
             }
         }        
         console.log(puntajeTotal);
@@ -105,8 +129,9 @@ $(document).ready(function(){
     $(".btn-reinicio").on("click", function(){
         var boton = $(this);
         var estado = boton.attr("data-estado");
+        console.log(estado);
         if(estado=="inicio"){
-            boton.attr("data","reinicio").text("Reiniciar");
+            //boton.attr("data-estado","reinicio").text("Reiniciar");
             juegoAPP.iniciarJuego();
         }else{
             window.location.reload();
