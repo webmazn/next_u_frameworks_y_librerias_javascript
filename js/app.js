@@ -10,7 +10,7 @@ var juegoAPP = (function(){
     var cambiarColorTitulo = function(){
         var titulo = $(".main-titulo");
         var contador = 0;
-        var intervalo = setInterval(function(){
+        setInterval(function(){//var intervalo = 
             if(contador%2==0){
                 titulo.animate({"color":color2});
             }else{
@@ -28,7 +28,7 @@ var juegoAPP = (function(){
         for(var i=0;i<cantidad; i++){
             for(var j=0;j<cantidad; j++){
                 var caramelo = generarCamarelos();
-                $(".col-"+(i+1)).append("<img src='image/"+caramelo+".png' class='caramelo"+caramelo+"'>")
+                $(".col-"+(i+1)).append("<div class='elemento ui-droppable'><img src='image/"+caramelo+".png' class='caramelo"+caramelo+" ui-draggable ui-draggable-handle' style='position: relative;'></div>")
             }
         }
     }
@@ -40,18 +40,19 @@ var juegoAPP = (function(){
                 if(diferencia>0){
                     for(var j=0;j<diferencia; j++){
                         var caramelo = generarCamarelos();
-                        $(".col-"+(i+1)).prepend("<img src='image/"+caramelo+".png' class='caramelo"+caramelo+"' style='display:none;'>");
+                        $(".col-"+(i+1)).prepend("<div class='elemento ui-droppable'><img src='image/"+caramelo+".png' class='caramelo"+caramelo+" ui-draggable ui-draggable-handle' style='display:none; position: relative;'></div>");
                         $(".col-"+(i+1)).find("img:hidden").fadeIn(500);
                     }
                 }
-            }                    
+            }
         },tiempo);
+        setTimeout(obtenerLineasHV,(tiempo*2));
     }
     var actualizarPuntuacion = function(puntajeTotal,callback){
         $("#score-text").empty().text(puntajeTotal);
         callback();
     }
-    var caramelosLineaHorizontal = function(){        
+    var obtenerLineasHV = function(){        
         var clasesHorizontal = new Array();
         var clasesVertical = new Array();
         for(var i=0; i<cantidad; i++){
@@ -66,8 +67,8 @@ var juegoAPP = (function(){
             clasesHorizontal.push(clasesH);
             clasesVertical.push(clasesV);
         }
-        console.log(clasesHorizontal);
-        console.log(clasesVertical);
+        //console.log(clasesHorizontal);
+        //console.log(clasesVertical);
         var posicionesHorizontales = new Array();
         var posicionesVerticales = new Array();
         for(var i=0; i<cantidad; i++){
@@ -88,14 +89,14 @@ var juegoAPP = (function(){
             posicionesHorizontales.push(posicionHorizontal);
             posicionesVerticales.push(posicionVertical);
         }
-        console.log(posicionesHorizontales);
-        console.log(posicionesVerticales);
+        //console.log(posicionesHorizontales);
+        //console.log(posicionesVerticales);
         for(var i=0; i<cantidad; i++){
             if(posicionesHorizontales[i].length>0){
                 for(var j=0; j<posicionesHorizontales[i].length; j++){
                     var posicion = posicionesHorizontales[i][j];
                     $(".col-"+(posicion+1)).find("img").eq(i).fadeOut(500, function(){
-                        $(this).remove();
+                        $(this).parent().remove();
                     });
                     puntajeTotal += puntaje;  
                 }             
@@ -104,14 +105,42 @@ var juegoAPP = (function(){
                 for(var j=0; j<posicionesVerticales[i].length; j++){
                     var posicion = posicionesVerticales[i][j];
                     $(".col-"+(i+1)).find("img").eq(posicion).fadeOut(500, function(){
-                        $(this).remove();
+                        $(this).parent().remove();
                     });
                     puntajeTotal += puntaje;  
                 }                   
             }
         }        
-        console.log(puntajeTotal);
-        actualizarPuntuacion(puntajeTotal,traerMasCaramelos);
+        //console.log(puntajeTotal);
+        actualizarPuntuacion(puntajeTotal,traerMasCaramelos);        
+    }
+    var iniciarTimer = function(){ //https://jquerytimer.com/
+        $('#timer').timer({
+            duration: '120s',
+            format: '%M:%S',
+            countdown: true,
+            callback: function() {
+                alert('Tiempo cumplido');
+            }
+        });        
+    }
+    var elementosDragDrop = function(){
+        $(".elemento img").draggable({
+            containment: ".panel-tablero"
+        });
+        $(".elemento").droppable({
+            accept: ".elemento img",
+            drop: function( event, ui ) {
+                $(this).find("img").hide();
+                var clase = $(this).find("img").attr("class");
+                var src = $(this).find("img").attr("src");
+                var item = $(ui.draggable);
+                $(this).append(item.css({"left":0,"top":0}));
+                $(this).find("img:hidden").remove();
+                
+                $(ui.draggable).css({"border":"5px solid #f00"});//attr({"src":src,"class":clase});
+            }
+        });      
     }
     return {
         cargarJuego: function(){
@@ -119,7 +148,9 @@ var juegoAPP = (function(){
             mostrarCaramelosRandom();            
         },
         iniciarJuego: function(){
-            caramelosLineaHorizontal();
+            //iniciarTimer();
+            obtenerLineasHV();
+            elementosDragDrop();
         }
     }
 })();
