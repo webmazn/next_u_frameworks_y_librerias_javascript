@@ -101,3 +101,10 @@ div[class^='col']{
   width: 100%;/*99.4px;*/
   height: 97px;/*96px;*/
 }
+.elementosPermitidos{
+  background: rgba(250, 233, 0, .5);
+  z-index: 1;
+}
+.ui-draggable-dragging{
+  z-index: 9999;
+}
