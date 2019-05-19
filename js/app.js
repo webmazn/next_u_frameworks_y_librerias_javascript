@@ -2,11 +2,12 @@ var juegoAPP = (function(){
     var tiempo = 1500;
     var color1 = "#DCFF0E";
     var color2 = "#FFFFFF";
-    var cantidad = 7;
+    var cantidad = 7;//7
     var caramelos = 4;
     var puntaje = 10;
     var puntajeTotal = 0;
     var movimientosTotal = 0;
+    var trayecto = false;
 
     var cambiarColorTitulo = function(){
         var titulo = $(".main-titulo");
@@ -26,10 +27,11 @@ var juegoAPP = (function(){
         return Math.floor((Math.random() * caramelos) + 1);        
     }
     var mostrarCaramelosRandom = function(){
-        for(var i=0;i<cantidad; i++){
-            for(var j=0;j<cantidad; j++){
+        var cantidadM =cantidad*2;
+        for(var i=0;i<cantidadM; i++){
+            for(var j=0;j<cantidadM; j++){
                 var caramelo = generarCamarelos();
-                $(".col-"+(i+1)).append("<div class='elemento ui-droppable'><img src='image/"+caramelo+".png' class='caramelo"+caramelo+" ui-draggable ui-draggable-handle' style='position: relative;'></div>")
+                $(".col-"+(i+1)).append("<div class='elemento'><img src='image/"+caramelo+".png' class='caramelo"+caramelo+"'></div>")
             }
         }
     }
@@ -37,17 +39,16 @@ var juegoAPP = (function(){
         setTimeout(function(){
             for(var i=0; i<cantidad; i++){
                 var caramelos = $(".col-"+(i+1)).find("img").length;
-                var diferencia = cantidad-caramelos;
+                var diferencia = (cantidad*2)-caramelos;
                 if(diferencia>0){
                     for(var j=0;j<diferencia; j++){
                         var caramelo = generarCamarelos();
-                        $(".col-"+(i+1)).prepend("<div class='elemento ui-droppable'><img src='image/"+caramelo+".png' class='caramelo"+caramelo+" ui-draggable ui-draggable-handle' style='display:none; position: relative;'></div>");
-                        $(".col-"+(i+1)).find("img:hidden").fadeIn(500);
+                        $(".col-"+(i+1)).prepend("<div class='elemento'><img src='image/"+caramelo+".png' class='caramelo"+caramelo+"'></div>");
                     }
                 }
             }
-        },tiempo);
-        setTimeout(obtenerLineasHV,(tiempo*2));
+            obtenerLineasHV();       
+        },tiempo);        
     }
     var obtenerLineasHV = function(){        
         var clasesHorizontal = new Array();
@@ -56,9 +57,11 @@ var juegoAPP = (function(){
             var clasesH = new Array();
             var clasesV = new Array();
             for(var j=0; j<cantidad; j++){
-                var claseH = $(".col-"+(j+1)).find("img").eq(i).attr("class");
+            //for(var j=(cantidad-1); j>0; j--){
+                //var claseH = $(".col-"+(j+1)).find("img").eq(i).attr("class");
+                var claseH = $(".col-"+(j+1)).find("img").eq(cantidad+i).attr("class");
                 clasesH.push(claseH);
-                var claseV = $(".col-"+(i+1)).find("img").eq(j).attr("class");
+                var claseV = $(".col-"+(i+1)).find("img").eq(cantidad+j).attr("class");
                 clasesV.push(claseV);
             }
             clasesHorizontal.push(clasesH);
@@ -88,11 +91,12 @@ var juegoAPP = (function(){
         }
         //console.log(posicionesHorizontales);
         //console.log(posicionesVerticales);
+        var tiempoEfecto = 270; // 270 * 5 = 1350 [1350<tiempo=1500]
         for(var i=0; i<cantidad; i++){
             if(posicionesHorizontales[i].length>0){
                 for(var j=0; j<posicionesHorizontales[i].length; j++){
                     var posicion = posicionesHorizontales[i][j];
-                    $(".col-"+(posicion+1)).find("img").eq(i).fadeOut(500, function(){
+                    $(".col-"+(posicion+1)).find("img").eq(i+cantidad).fadeOut(tiempoEfecto).fadeIn(tiempoEfecto).fadeOut(tiempoEfecto).fadeIn(tiempoEfecto).fadeOut(tiempoEfecto, function(){
                         $(this).parent().remove();
                     });
                     puntajeTotal += puntaje;  
@@ -101,34 +105,53 @@ var juegoAPP = (function(){
             if(posicionesVerticales[i].length>0){
                 for(var j=0; j<posicionesVerticales[i].length; j++){
                     var posicion = posicionesVerticales[i][j];
-                    $(".col-"+(i+1)).find("img").eq(posicion).fadeOut(500, function(){
+                    $(".col-"+(i+1)).find("img").eq(posicion+cantidad).fadeOut(tiempoEfecto).fadeIn(tiempoEfecto).fadeOut(tiempoEfecto).fadeIn(tiempoEfecto).fadeOut(tiempoEfecto, function(){
                         $(this).parent().remove();
                     });
                     puntajeTotal += puntaje;  
                 }                   
             }
-        }        
-        //console.log(puntajeTotal);
-        actualizarPuntuacion(puntajeTotal);        
+        }
+        //$("#score-text").empty().text(puntajeTotal);
+        if(trayecto) actualizarPuntuacion();        
     }
-    var actualizarPuntuacion = function(puntajeTotal){
+    var actualizarPuntuacion = function(){
         $("#score-text").empty().text(puntajeTotal);
         traerMasCaramelos();
         elementosDragDrop();
-    }    
+    }
+    var finalizarJuego = function(){
+        $(".elemento").css({"height":"auto","width":"100%"});
+        $(".panel-tablero").animate(
+            { "border":"0", "height":"0%", "width":"0%" },
+            { easing: 'swing', duration: tiempo, complete: function(){ $(this).remove();} }
+        );
+        $(".panel-score").animate({"width":"100%"},tiempo);
+        $(".time").animate(
+            {"border":"0","height":"0%","width":"0%"},
+            { easing: 'swing', duration: tiempo, complete: function(){ $(this).remove();} }
+        );
+        $(".time").find("[class^='data']").animate(
+            {"font-size":"0"},
+            { easing: 'swing', duration: tiempo, complete: function(){ $(".final").fadeIn();} }
+        );
+    }
     var iniciarTimer = function(){ //https://jquerytimer.com/
+        trayecto = true;
         $('#timer').timer({
             duration: '120s',
             format: '%M:%S',
             countdown: true,
             callback: function() {
-                alert('Tiempo cumplido');
+                trayecto = false;
+                finalizarJuego(); //alert('Tiempo cumplido');
             }
         });        
     }
     var elementosDragDrop = function(){
         $(".elemento img").draggable({
-            containment: ".panel-tablero"
+            containment: ".panel-tablero",
+            opacity: 0.35
         });
         $(".elemento").droppable({
             accept: ".elemento img",
@@ -139,13 +162,23 @@ var juegoAPP = (function(){
                 imagenDestino.hide();       
                 var imagenOrigen = $(ui.draggable);
                 var origen = imagenOrigen.parent();
-                destino.append(imagenOrigen.css({"left":0,"top":0}));
+                destino.append(imagenOrigen.css({"left":0,"top":0,opacity:100}));
                 destino.find("img:hidden").remove();
-                origen.append(cloneImagenDestino);
+                origen.append(cloneImagenDestino.css({"left":0,"top":0,opacity:100}));
                 movimientosTotal++;
                 $("#movimientos-text").empty().text(movimientosTotal);
                 //origen.css({"border":"5px solid #ff0"});
                 //destino.css({"border":"5px solid #f00"});
+            },
+            over: function(event, ui) {
+                var destino = $(this);
+                var imagenDestino = destino.find("img");
+                imagenDestino.css({opacity:0.35});
+            },
+            out: function(event, ui) {
+                var destino = $(this);
+                var imagenDestino = destino.find("img");
+                imagenDestino.css({opacity:1});
             }
         });      
     }
@@ -157,7 +190,6 @@ var juegoAPP = (function(){
         iniciarJuego: function(){
             iniciarTimer();
             obtenerLineasHV();
-            //elementosDragDrop();
         }
     }
 })();
