@@ -36,20 +36,22 @@ var juegoAPP = (function(){
     }
     var traerMasCaramelos = function(){
         setTimeout(function(){
+            //$(".elemento img").draggable("disable");
             for(var i=0; i<cantidad; i++){
                 var caramelos = $(".col-"+(i+1)).find("img").length;
                 var diferencia = (cantidad*2)-caramelos;
-                if(diferencia>0){
+                if(diferencia>0){                    
                     for(var j=0;j<diferencia; j++){
                         var caramelo = generarCamarelos();
                         $(".col-"+(i+1)).prepend("<div class='elemento'><img src='image/"+caramelo+".png' class='caramelo"+caramelo+" permitido'></div>");
                     }
                 }
             }
-            obtenerLineasHV();       
+            obtenerLineasHV();
+            //$(".elemento img").draggable("enable");  
         },tiempo);
     }
-    var obtenerLineasHV = function(){        
+    var obtenerLineasHV = function(){
         var clasesHorizontal = new Array();
         var clasesVertical = new Array();
         for(var i=0; i<cantidad; i++){
@@ -195,25 +197,40 @@ var juegoAPP = (function(){
             containment: ".panel-tablero",
             //opacity: 0.35,
             cursor: "move",
-            revert: "invalid"
+            revert: "invalid",
+            drag: function(event, ui ){
+                var origen = $(this).parent();
+                origen.prev().addClass("elementosPermitidos");
+                origen.next().addClass("elementosPermitidos");
+                var posicion = origen.index(); 
+                var clase = origen.parent().attr("class");
+                var columna = clase.substring(clase.length - 1, clase.length);
+                var columnaAnterior = $(".col-"+(parseInt(columna)-1)).find(".elemento").eq(posicion);
+                var columnaPosterior = $(".col-"+(parseInt(columna)+1)).find(".elemento").eq(posicion);                
+                columnaAnterior.addClass("elementosPermitidos");
+                columnaPosterior.addClass("elementosPermitidos");   
+            }
         });
         $(".elemento").droppable({
             accept: ".permitido",
             over: function(event, ui) {
                 var element = elementosGrid($(this),ui);
-                element['imagenDestino'].css({opacity:1});
-                element['imagenOrigen'].removeClass("permitido");
-                element['origen'].prev().addClass("elementosPermitidos");
-                element['origen'].next().addClass("elementosPermitidos");
-                element['columnaAnterior'].addClass("elementosPermitidos");
-                element['columnaPosterior'].addClass("elementosPermitidos");               
-            },
-            out: function(event, ui) {
-                var element = elementosGrid($(this),ui);
+
                 element['imagenDestino'].css({opacity:0.35});
                 //element['imagenOrigen'].addClass("permitido");
                 //$(".elemento").removeClass("elementosPermitidos");
-                $(".elemento img").css({opacity:1});            
+                $(".elemento img").css({opacity:1});                   
+            },
+            out: function(event, ui) {
+                var element = elementosGrid($(this),ui);
+                $(".elemento").removeClass("elementosPermitidos");
+                $(".elemento img").addClass("permitido");
+                element['imagenDestino'].css({opacity:1});
+                element['imagenOrigen'].removeClass("permitido");
+                /*element['origen'].prev().addClass("elementosPermitidos");
+                element['origen'].next().addClass("elementosPermitidos");
+                element['columnaAnterior'].addClass("elementosPermitidos");
+                element['columnaPosterior'].addClass("elementosPermitidos");*/
             }
         });  
         $(".elementosPermitidos").droppable({
@@ -222,11 +239,11 @@ var juegoAPP = (function(){
                 var element = elementosGrid($(this),ui);
                 element['imagenDestino'].hide();
                 element['destino'].append(element['imagenOrigen'].css({"left":0,"top":0,opacity:100}));
-                element['destino'].find("img:hidden").remove();
-                element['origen'].append(element['cloneImagenDestino'].css({"left":0,"top":0,opacity:100}));         
+                //element['destino'].find("img:hidden").remove();
+                element['origen'].append(element['imagenDestino'].animate({"left":0,"top":0,opacity:100}).fadeIn(250));         
                 $(".elemento").removeClass("elementosPermitidos");
                 $(".elemento img").css({opacity:1}).addClass("permitido");
-                actualizarMovimiento();                
+                actualizarMovimiento();
             }
         });
         //elementosDragDrop();
@@ -237,7 +254,8 @@ var juegoAPP = (function(){
             mostrarCaramelosRandom();            
         },
         iniciarJuego: function(){
-            iniciarTimer(); //trayecto = true;
+            //iniciarTimer();
+            trayecto = true;
             obtenerLineasHV();
         }
     }
@@ -248,7 +266,6 @@ $(document).ready(function(){
     $(".btn-reinicio").on("click", function(){
         var boton = $(this);
         var estado = boton.attr("data-estado");
-        console.log(estado);
         if(estado=="inicio"){
             boton.attr("data-estado","reinicio").text("Reiniciar");
             juegoAPP.iniciarJuego();
