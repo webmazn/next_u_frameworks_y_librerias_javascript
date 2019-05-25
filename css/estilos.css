@@ -31,10 +31,11 @@ body{
   display: flex;
   flex-flow: wrap-reverse;/*row wrap*/
   overflow: hidden;
+  position: relative;
 }
 .panel-tablero img{
-  height: 100%;
-  width: 100%;
+  height: 85%;
+  width: auto;
 }
 .panel-score{
   width: 25%;
@@ -97,14 +98,42 @@ div[class^='col']{
   align-items: center;
 
 }
-.elemento{
+.elemento, .inhabilitado{
   width: 100%;/*99.4px;*/
   height: 97px;/*96px;*/
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .elementosPermitidos{
-  background: rgba(250, 233, 0, .5);
+  /*animation-name: permitidos;
+  animation-duration: 3s;*/
+  width: 100%;/*99.4px;*/
+  height: 97px;/*96px;*/  
+  background-color: rgba(250, 233, 0, .5);
   z-index: 1;
 }
 .ui-draggable-dragging{
   z-index: 9999;
 }
+@keyframes permitidos{
+  from {background-color: none;}
+  to {background-color: rgba(250, 233, 0, .5);}
+}
+#indicador{
+  border-radius: 5px;
+  bottom: 0px;
+  color: #fff;
+  font-family: sans-serif;
+  font-size: 9px;  
+  padding: 3px 10px;
+  position: absolute;
+  right: 0px;
+  text-align: center;
+  width: 135px;
+  z-index: 9999999;
+}
+.colorDefecto{background-color: #E87306;}
+.colorAcumular{background-color: #009edd;}
+.colorCaramelo{background-color: #dd0019;}
+.colorContinua{background-color: #167c08;}
